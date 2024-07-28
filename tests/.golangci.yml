@@ -1,0 +1,95 @@
+run:
+  tests: true
+
+linters-settings:
+  funlen:
+    lines: 150
+    statements: 80
+  depguard:
+    rules:
+      main:
+        allow: [
+          "github.com/cucumber/godog",
+          "github.com/spf13/cobra",
+          "github.com/stretchr/testify/require",
+          "encoding/json",
+          "errors",
+          "time",
+          "sync",
+          "go.uber.org/zap/zapcore",
+          "testing",
+          "net/http/httptest",
+          "strconv",
+          "github.com/alicebob/miniredis/v2",
+          "io",
+          "net/http",
+          "go.uber.org/zap",
+          "strings",
+          "github.com/redis/go-redis/v9",
+          "os",
+          "bytes",
+          "net/url",
+          "net/netip",
+          "fmt",
+          "syscall",
+          "os/signal",
+          "context",
+        ]
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    # - deadcode # deprecated
+    - depguard
+    - dogsled
+    - dupl
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - funlen
+    - gci
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - gofumpt
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+#    - ifshort # deprecated
+    - importas
+    - ineffassign
+    - lll
+    - makezero
+    - misspell
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+#    - structcheck # deprecated
+    - stylecheck
+    - tagliatelle
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+#    - varcheck # deprecated
+    - wastedassign
+    - whitespace

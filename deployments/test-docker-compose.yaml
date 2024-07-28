@@ -1,0 +1,32 @@
+services:
+  integration_tests:
+    build:
+      dockerfile: ./tests/Dockerfile
+      context: ../
+    container_name: integration_tests
+    links:
+      - anti_bruteforce
+      - redis
+
+  anti_bruteforce:
+    build:
+      dockerfile: ./build/Dockerfile
+      context: ../
+    container_name: anti-bruteforce
+    depends_on:
+      - redis
+    environment:
+      - ANTI_BRUTEFORCE_LISTEN_ADDR=0.0.0.0:8080
+      - ANTI_BRUTEFORCE_N=1
+      - ANTI_BRUTEFORCE_M=100
+      - ANTI_BRUTEFORCE_K=100
+      - ANTI_BRUTEFORCE_BUCKET_SIZE=100
+    restart: on-failure
+    ports:
+      - "8080:8080"
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - '6379:6379'
