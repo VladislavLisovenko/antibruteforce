@@ -10,7 +10,7 @@ import (
 
 	"github.com/VladislavLisovenko/antibruteforce/internal/app"
 	"github.com/VladislavLisovenko/antibruteforce/internal/config"
-	"github.com/VladislavLisovenko/antibruteforce/internal/list"
+	"github.com/VladislavLisovenko/antibruteforce/internal/keyvaluestorage"
 	"github.com/VladislavLisovenko/antibruteforce/internal/logger"
 	"github.com/VladislavLisovenko/antibruteforce/internal/ratelimit"
 	"github.com/VladislavLisovenko/antibruteforce/internal/server"
@@ -28,13 +28,13 @@ func main() {
 	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	logg, err := logger.New(cfg.LogLevel)
+	logg, err := logger.New(cfg.Redis.LogLevel)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1) //nolint:gocritic
 	}
 
-	rURL, err := redis.ParseURL(cfg.RedisURL)
+	rURL, err := redis.ParseURL(cfg.Redis.URL)
 	if err != nil {
 		logg.Error(err)
 		os.Exit(1)
@@ -42,25 +42,26 @@ func main() {
 
 	rClient := redis.NewClient(rURL)
 
-	whiteList, err := list.New(ctx, cfg.WhiteListRedisKey, *rClient)
+	whiteList, err := keyvaluestorage.New(ctx, cfg.Redis.WhiteListKey, *rClient)
 	if err != nil {
 		logg.Error(err)
 		os.Exit(1)
 	}
 
-	blackList, err := list.New(ctx, cfg.BlackListRedisKey, *rClient)
+	blackList, err := keyvaluestorage.New(ctx, cfg.Redis.BlackListKey, *rClient)
 	if err != nil {
 		logg.Error(err)
 		os.Exit(1)
 	}
 
-	rt := ratelimit.New(cfg.LoginLimit, cfg.PasswordLimit, cfg.IPLimit, cfg.BucketSize, cfg.BlockInterval)
+	lim := cfg.Limits
+	rt := ratelimit.New(lim.LoginLimit, lim.PasswordLimit, lim.IPLimit, lim.BucketSize, lim.BlockInterval)
 
 	a := app.NewApp(rt, whiteList, blackList)
-	s := server.New(cfg.Addr, a, logg)
+	s := server.New(cfg.HostInfo.Addr, a, logg)
 
 	go shutdown(ctx, s, logg)
-	go clearRateLimit(ctx, rt, cfg.BlockInterval)
+	go clearRateLimit(ctx, rt, cfg.Limits.BlockInterval)
 
 	logg.Info("antibruteforce is running")
 

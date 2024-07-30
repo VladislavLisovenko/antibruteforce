@@ -3,14 +3,14 @@ package app
 import (
 	"context"
 
-	"github.com/VladislavLisovenko/antibruteforce/internal/list"
+	"github.com/VladislavLisovenko/antibruteforce/internal/keyvaluestorage"
 	"github.com/VladislavLisovenko/antibruteforce/internal/ratelimit"
 )
 
 type application struct {
 	rateLimit ratelimit.RateLimit
-	blackList list.List
-	whiteList list.List
+	blackList keyvaluestorage.KeyValueStorage
+	whiteList keyvaluestorage.KeyValueStorage
 }
 
 type Application interface {
@@ -22,7 +22,7 @@ type Application interface {
 	CheckAuth(login string, password string, ip string) bool
 }
 
-func NewApp(rt ratelimit.RateLimit, whiteList list.List, blackList list.List) Application {
+func NewApp(rt ratelimit.RateLimit, whiteList, blackList keyvaluestorage.KeyValueStorage) Application {
 	return &application{
 		rateLimit: rt,
 		blackList: blackList,

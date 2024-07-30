@@ -17,7 +17,7 @@ var resetCommand = &cobra.Command{
 	RunE: func(_ *cobra.Command, _ []string) error {
 		var err error
 		var b []byte
-		hc := httpclient.New(cfg.Host)
+		hc := httpclient.New(cfg.HostInfo.Host)
 		vs := url.Values{}
 		vs.Set(server.IPField, network)
 		vs.Set(server.LoginField, login)

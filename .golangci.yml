@@ -24,7 +24,7 @@ linters-settings:
           "net/http/httptest",
           "strconv",
           "github.com/alicebob/miniredis/v2",
-          "github.com/VladislavLisovenko/antibruteforce/internal/list",
+          "github.com/VladislavLisovenko/antibruteforce/internal/keyvaluestorage",
           "io",
           "github.com/VladislavLisovenko/antibruteforce/internal/app",
           "github.com/VladislavLisovenko/antibruteforce/internal/logger",

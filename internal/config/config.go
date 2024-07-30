@@ -47,18 +47,30 @@ var (
 	errSameRedisKeys     = errors.New("whitelist and blacklist cannot have the same keys")
 )
 
+type HostInfo struct {
+	Addr string
+	Host string
+}
+
+type Limits struct {
+	LoginLimit    int
+	PasswordLimit int
+	IPLimit       int
+	BucketSize    int
+	BlockInterval float64
+}
+
+type Redis struct {
+	WhiteListKey string
+	BlackListKey string
+	LogLevel     string
+	URL          string
+}
+
 type Config struct {
-	Addr              string
-	Host              string
-	LoginLimit        int
-	PasswordLimit     int
-	IPLimit           int
-	BucketSize        int
-	BlockInterval     float64
-	WhiteListRedisKey string
-	BlackListRedisKey string
-	LogLevel          string
-	RedisURL          string
+	HostInfo HostInfo
+	Limits   Limits
+	Redis    Redis
 }
 
 func New() (Config, error) {
@@ -67,38 +79,38 @@ func New() (Config, error) {
 	if err != nil {
 		return cfg, err
 	}
-	cfg.LoginLimit = n
+	cfg.Limits.LoginLimit = n
 
 	m, err := strconv.Atoi(Env(passwordLimitEnv, defaultPasswordLimit))
 	if err != nil {
 		return cfg, err
 	}
-	cfg.PasswordLimit = m
+	cfg.Limits.PasswordLimit = m
 
 	k, err := strconv.Atoi(Env(ipLimitEnv, defaultIPLimit))
 	if err != nil {
 		return cfg, err
 	}
-	cfg.IPLimit = k
+	cfg.Limits.IPLimit = k
 
 	bucketSize, err := strconv.Atoi(Env(bucketSizeEnv, defaultBucketSize))
 	if err != nil {
 		return cfg, err
 	}
-	cfg.BucketSize = bucketSize
+	cfg.Limits.BucketSize = bucketSize
 
 	blockInterval, err := strconv.ParseFloat(Env(blockIntervalEnv, defaultBlockInterval), 64)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.BlockInterval = blockInterval
+	cfg.Limits.BlockInterval = blockInterval
 
-	cfg.WhiteListRedisKey = Env(whiteListEnv, defaultWhiteListKey)
-	cfg.BlackListRedisKey = Env(blackListEnv, defaultBlackListKey)
-	cfg.LogLevel = Env(logLevelEnv, defaultLogLevel)
-	cfg.RedisURL = Env(redisURLEnv, defaultRedisURL)
-	cfg.Addr = Env(addrEnv, defaultAddr)
-	cfg.Host = Env(hostEnv, defaultHost)
+	cfg.Redis.WhiteListKey = Env(whiteListEnv, defaultWhiteListKey)
+	cfg.Redis.BlackListKey = Env(blackListEnv, defaultBlackListKey)
+	cfg.Redis.LogLevel = Env(logLevelEnv, defaultLogLevel)
+	cfg.Redis.URL = Env(redisURLEnv, defaultRedisURL)
+	cfg.HostInfo.Addr = Env(addrEnv, defaultAddr)
+	cfg.HostInfo.Host = Env(hostEnv, defaultHost)
 
 	return cfg, cfg.validate()
 }
@@ -112,23 +124,23 @@ func Env(key string, defaultValue string) string {
 }
 
 func (c Config) validate() error {
-	if c.PasswordLimit == 0 {
+	if c.Limits.PasswordLimit == 0 {
 		return errZeroPasswordLimit
 	}
 
-	if c.LoginLimit == 0 {
+	if c.Limits.LoginLimit == 0 {
 		return errZeroLoginLimit
 	}
 
-	if c.IPLimit == 0 {
+	if c.Limits.IPLimit == 0 {
 		return errZeroIPLimit
 	}
 
-	if c.BucketSize == 0 {
+	if c.Limits.BucketSize == 0 {
 		return errZeroBucketSize
 	}
 
-	if c.WhiteListRedisKey == c.BlackListRedisKey {
+	if c.Redis.WhiteListKey == c.Redis.BlackListKey {
 		return errSameRedisKeys
 	}
 

@@ -22,7 +22,7 @@ var blackListCommand = &cobra.Command{
 
 		var err error
 		var b []byte
-		hc := httpclient.New(cfg.Host)
+		hc := httpclient.New(cfg.HostInfo.Host)
 		vs := url.Values{}
 		vs.Set(server.IPField, network)
 

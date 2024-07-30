@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/VladislavLisovenko/antibruteforce/internal/app"
-	"github.com/VladislavLisovenko/antibruteforce/internal/list"
+	"github.com/VladislavLisovenko/antibruteforce/internal/keyvaluestorage"
 	"github.com/VladislavLisovenko/antibruteforce/internal/logger"
 	"github.com/VladislavLisovenko/antibruteforce/internal/ratelimit"
 	"github.com/alicebob/miniredis/v2"
@@ -121,9 +121,9 @@ func TestHandler(t *testing.T) {
 	r := redis.NewClient(&redis.Options{Addr: s.Addr()})
 	ctx := context.Background()
 	rt := ratelimit.New(2, 50, 20, 50, 10)
-	wl, err := list.New(ctx, wlKey, *r)
+	wl, err := keyvaluestorage.New(ctx, wlKey, *r)
 	require.NoError(t, err)
-	bl, err := list.New(ctx, blKey, *r)
+	bl, err := keyvaluestorage.New(ctx, blKey, *r)
 	require.NoError(t, err)
 	a := app.NewApp(rt, wl, bl)
 	l, err := logger.New(loggerLevel)

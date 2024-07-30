@@ -1,4 +1,4 @@
-package list
+package keyvaluestorage
 
 import (
 	"context"
@@ -8,21 +8,21 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type list struct {
+type keyValueStorage struct {
 	l           map[netip.Prefix]struct{}
 	redisClient redis.Client
 	redisKey    string
 	mu          sync.RWMutex
 }
 
-type List interface {
+type KeyValueStorage interface {
 	Add(ctx context.Context, el string) error
 	Delete(ctx context.Context, el string) error
 	Check(el string) bool
 	Reset(ctx context.Context) error
 }
 
-func New(ctx context.Context, redisKey string, redisClient redis.Client) (List, error) {
+func New(ctx context.Context, redisKey string, redisClient redis.Client) (KeyValueStorage, error) {
 	elements, err := redisClient.SMembers(ctx, redisKey).Result()
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func New(ctx context.Context, redisKey string, redisClient redis.Client) (List, 
 		l[net] = struct{}{}
 	}
 
-	return &list{
+	return &keyValueStorage{
 		l:           l,
 		redisKey:    redisKey,
 		redisClient: redisClient,
@@ -45,7 +45,7 @@ func New(ctx context.Context, redisKey string, redisClient redis.Client) (List, 
 	}, nil
 }
 
-func (l *list) Add(ctx context.Context, el string) error {
+func (l *keyValueStorage) Add(ctx context.Context, el string) error {
 	net, err := netip.ParsePrefix(el)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (l *list) Add(ctx context.Context, el string) error {
 	return r.Err()
 }
 
-func (l *list) Delete(ctx context.Context, el string) error {
+func (l *keyValueStorage) Delete(ctx context.Context, el string) error {
 	net, err := netip.ParsePrefix(el)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (l *list) Delete(ctx context.Context, el string) error {
 	return r.Err()
 }
 
-func (l *list) Check(el string) bool {
+func (l *keyValueStorage) Check(el string) bool {
 	addr, err := netip.ParseAddr(el)
 	if err != nil {
 		return false
@@ -91,7 +91,7 @@ func (l *list) Check(el string) bool {
 	return false
 }
 
-func (l *list) Reset(ctx context.Context) error {
+func (l *keyValueStorage) Reset(ctx context.Context) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.l = make(map[netip.Prefix]struct{})
